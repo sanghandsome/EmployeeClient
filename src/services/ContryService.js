@@ -6,7 +6,6 @@ const API_BASE = "http://localhost:8080/countries";
 
 export const pagingCountries = async (pageIndex, pageSize, keyword = "") => {
   const res = await axios.get(`${API_BASE}?page=${pageIndex}&size=${pageSize}&keyword=${keyword}`);
-  console.log("API response:", res);
   return res.data;
 };
 

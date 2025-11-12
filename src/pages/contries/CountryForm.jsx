@@ -1,8 +1,8 @@
 import React from "react";
 import { Formik, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { createCountry, editCountry } from "../../services/ContryService";
-import { Button, TextField, Typography, Box } from "@mui/material";
+import { Button, TextField, Box } from "@mui/material";
+import CountryStore from "../../stores/CountryStore";
 
 const validationSchema = Yup.object({
   code: Yup.string().required("Vui lòng nhập mã quốc gia"),
@@ -10,34 +10,33 @@ const validationSchema = Yup.object({
   description: Yup.string().required("Vui lòng nhập mô tả"),
 });
 
-export default function CountryForm({ country, onSuccess }) {
+export default function CountryForm({ country, onSave }) {
   const initialValues = country || { code: "", name: "", description: "" };
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
       if (country) {
-        await editCountry(country.id, values);
+        // update country thông qua MobX store
+        await CountryStore.updateCountry(country.id, values);
       } else {
-        await createCountry(values);
+        // create country thông qua MobX store
+        await CountryStore.createCountry(values);
       }
-      onSuccess();
+
+      if (onSave) onSave(); // callback để đóng modal
     } catch (e) {
-      console.error(e);
+      console.error("Form submit error:", e);
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <Box
-      sx={{
-        p: 5,
-        backgroundColor: "#fff",
-      }}
-    >
+    <Box sx={{ p: 5, backgroundColor: "#fff" }}>
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
+        enableReinitialize // quan trọng khi edit country
         onSubmit={handleSubmit}
       >
         {({ handleChange, values, isSubmitting }) => (
